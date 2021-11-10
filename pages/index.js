@@ -2,7 +2,23 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
-export default function Home() {
+import { absoluteUrl } from '../middlewares/utils'
+
+export async function getServerSideProps({req, query}) {
+  const { origin } = absoluteUrl(req);
+  const fetchPosts = await fetch(`${origin}/api/posts`);
+  const { posts } = await fetchPosts.json();
+  return {
+    props: {
+      posts
+    },
+    // will be passed to the page component as props
+  }
+}
+
+export default function Home({ posts }) {
+  const { rows, count } = posts
+  
   return (
     <div className={styles.container}>
       <Head>
@@ -20,6 +36,21 @@ export default function Home() {
           Get started by editing{' '}
           <code className={styles.code}>pages/index.js</code>
         </p>
+
+        <div className={styles.grid}>
+          {
+            rows.map((item, key) => (
+              <div key={key} className={styles.card}>
+                <h2>{item.title}</h2>
+                <div style={{position: 'relative', height: 120}}>
+                  <Image src={item.cover} layout='fill' objectFit="cover" alt="Cover post" />
+                </div>
+                <p>{item.content}</p>
+                <small>{item.createdAt}</small>
+              </div>
+            ))
+          }
+        </div>
 
         <div className={styles.grid}>
           <a href="https://nextjs.org/docs" className={styles.card}>

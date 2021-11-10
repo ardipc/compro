@@ -5,7 +5,15 @@ const db = require('../../../models/index');
 
 const handler = nextConnect()
   .get(async (req, res) => {
-    let rows = await db.users.findAndCountAll();
+    const { query: { page } } = req;
+    let rows = await db.users.findAndCountAll({
+      order: [
+        // Will escape title and validate DESC against a list of valid direction parameters
+        ['id', 'DESC'],
+      ],
+      offset: page ? +page : 0,
+      limit: 5,
+    });
     res.json({ success: true, users: rows });
   })
   .post(async (req, res) => {
