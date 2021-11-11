@@ -29,11 +29,11 @@ export default function Slug(props) {
     <Fragment>
       <NextSeo
         title={result.title}
-        description={result.description}
+        content={result.content}
         openGraph={{
           url: result.slug,
           title: result.title,
-          description: result.description,
+          content: result.content,
           images: [
             {
               url: result.cover,
