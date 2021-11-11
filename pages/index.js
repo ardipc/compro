@@ -2,12 +2,14 @@ import Head from 'next/head'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
-import { absoluteUrl } from '../middlewares/utils'
+import { absoluteUrl } from '../middleware/utils'
+
+import moment from 'moment-timezone';
 
 export async function getServerSideProps({req, query}) {
   const { origin } = absoluteUrl(req);
   const fetchPosts = await fetch(`${origin}/api/posts`);
-  const { posts } = await fetchPosts.json();
+  const posts = await fetchPosts.json();
   return {
     props: {
       posts
@@ -17,7 +19,7 @@ export async function getServerSideProps({req, query}) {
 }
 
 export default function Home({ posts }) {
-  const { rows, count } = posts
+  const { result, count } = posts
   
   return (
     <div className={styles.container}>
@@ -39,14 +41,14 @@ export default function Home({ posts }) {
 
         <div className={styles.grid}>
           {
-            rows.map((item, key) => (
+            result.map((item, key) => (
               <div key={key} className={styles.card}>
                 <h2>{item.title}</h2>
                 <div style={{position: 'relative', height: 120}}>
                   <Image src={item.cover} layout='fill' objectFit="cover" alt="Cover post" />
                 </div>
                 <p>{item.content}</p>
-                <small>{item.createdAt}</small>
+                <small>{moment(item.createdAt).format('LLL')}</small>
               </div>
             ))
           }
