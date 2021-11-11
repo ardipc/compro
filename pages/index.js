@@ -43,8 +43,8 @@ export default function Home({ posts }) {
         <div className={styles.grid}>
           {
             result.map((item, key) => (
-              <Link href={`/posts/${item.slug}`}>
-                <a key={key} className={styles.card}>
+              <Link key={key} href={`/posts/${item.slug}`}>
+                <a className={styles.card}>
                   <h2>{item.title}</h2>
                   <div style={{position: 'relative', height: 120}}>
                     <Image src={item.cover} layout='fill' objectFit="cover" alt="Cover post" />
