@@ -1,4 +1,5 @@
 import Head from 'next/head'
+import Link from 'next/link'
 import Image from 'next/image'
 import styles from '../styles/Home.module.css'
 
@@ -42,14 +43,16 @@ export default function Home({ posts }) {
         <div className={styles.grid}>
           {
             result.map((item, key) => (
-              <div key={key} className={styles.card}>
-                <h2>{item.title}</h2>
-                <div style={{position: 'relative', height: 120}}>
-                  <Image src={item.cover} layout='fill' objectFit="cover" alt="Cover post" />
-                </div>
-                <p>{item.content}</p>
-                <small>{moment(item.createdAt).format('LLL')}</small>
-              </div>
+              <Link href={`/posts/${item.slug}`}>
+                <a key={key} className={styles.card}>
+                  <h2>{item.title}</h2>
+                  <div style={{position: 'relative', height: 120}}>
+                    <Image src={item.cover} layout='fill' objectFit="cover" alt="Cover post" />
+                  </div>
+                  <p>{item.content}</p>
+                  <small>{moment(item.createdAt).format('LLL')}</small>
+                </a>
+              </Link>
             ))
           }
         </div>
