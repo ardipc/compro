@@ -1,31 +1,28 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import connectDB from '../../../middleware/mongodb';
+import Post from '../../../models/posts';
+import User from '../../../models/users';
 import nextConnect from 'next-connect';
-
-const db = require('../../../models/index');
 
 const handler = nextConnect()
   .get(async (req, res) => {
     const { id } = req.query;
-    const rows = await db.posts.findByPk(id, {
-      attributes: {
-        exclude: ['author']
-      },
-      include: [
-        { model: db.users, as: 'user', attributes: ['id', 'name', 'email'] }
-      ]
-    });
-    res.json({ success: true, post: rows });
+    Post.findById(id)
+      .populate({ path: 'author', select: 'name email', model: User })
+      .exec((err, result) => {
+        res.json({ success: true, result: err ? err : result });
+      });
   })
   .patch(async (req, res) => {
     const { body, query } = req;
     const { id } = query;
-    await db.posts.update(body, { where: { id }});
-    res.json({ success: true, post: body });
+    Post.findByIdAndUpdate(id, body, (err, result) => {
+      res.json({ success: true, result: err ? err : body });
+    });
   })
   .delete(async (req, res) => {
     const { id } = req.query;
-    await db.posts.destroy({ where: { id } });
-    res.json({ success: true, post: id });
+    await Post.findByIdAndRemove(id);
+    res.json({ success: true, result: id });
   });
   
-export default handler;
+export default connectDB(handler);

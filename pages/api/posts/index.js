@@ -1,34 +1,27 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import connectDB from '../../../middleware/mongodb';
+import Post from '../../../models/posts';
 import nextConnect from 'next-connect';
-
-const db = require('../../../models/index');
+import User from '../../../models/users';
 
 const handler = nextConnect()
   .get(async (req, res) => {
     const { query: { page } } = req;
-    let rows = await db.posts.findAndCountAll({
-      where: {
-        status: 1 // only status 1 will show
-      },
-      attributes: {
-        exclude: ['author', 'status']
-      },
-      include: [
-        { model: db.users, as: 'user', attributes: ['id', 'name', 'email'] }
-      ],
-      order: [
-        // Will escape title and validate DESC against a list of valid direction parameters
-        ['id', 'DESC'],
-      ],
-      offset: page ? +page : 0,
-      limit: 5,
-    });
-    res.json({ success: true, posts: rows });
+    var perPage = 5, numPage = Math.max(0, page ? page : 0);
+    let result = await Post.find()
+      .populate({ path: 'author', select: 'name email', model: User })
+      .limit(perPage)
+      .skip(perPage * numPage)
+      .sort({ createdAt: 'desc' });
+    let count = await Post.count();
+    res.json({ success: true, count, result });
   })
   .post(async (req, res) => {
     const { body } = req;
-    const user = await db.posts.create({ ...body, createdAt: new Date(), updatedAt: new Date() });
-    res.json({ success: true, user });
+    const { title } = body;
+    var addSlug = { ...body, slug: title.toLowerCase().replace(/[^A-Za-z0-9 -]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-') };
+    var post = new Post(addSlug);
+    var result = await post.save();
+    res.json({ success: true, result });
   });
   
-export default handler;
+export default connectDB(handler);

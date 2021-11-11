@@ -1,24 +1,25 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
+import connectDB from '../../../middleware/mongodb';
+import User from '../../../models/users';
 import nextConnect from 'next-connect';
-
-const db = require('../../../models/index');
 
 const handler = nextConnect()
   .get(async (req, res) => {
     const { id } = req.query;
-    const rows = await db.users.findByPk(id);
-    res.json({ success: true, user: rows });
+    User.findById(id, (err, result) => {
+      res.json({ success: true, result: err ? err : result });
+    });
   })
   .patch(async (req, res) => {
     const { body, query } = req;
     const { id } = query;
-    await db.users.update(body, { where: { id }});
-    res.json({ success: true, user: body });
+    User.findByIdAndUpdate(id, body, (err, result) => {
+      res.json({ success: true, result: err ? err : body });
+    });
   })
   .delete(async (req, res) => {
     const { id } = req.query;
-    await db.users.destroy({ where: { id } });
-    res.json({ success: true, user: id });
+    await User.findByIdAndRemove(id);
+    res.json({ success: true, result: id });
   });
   
-export default handler;
+export default connectDB(handler);
